@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tujji AI</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #f5f5f5;
+            display: flex;
+        }
+
+        /* LEFT CHAT */
+        .chat-container {
+            width: 70%;
+            padding: 20px;
+        }
+
+        .chat-box {
+            height: 80vh;
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* INPUT */
+        .input-area {
+            margin-top: 10px;
+            display: flex;
+        }
+
+        input {
+            flex: 1;
+            padding: 15px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            margin-left: 10px;
+            padding: 15px 20px;
+            border-radius: 20px;
+            border: none;
+            background: black;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* RIGHT PANEL */
+        .side-panel {
+            width: 30%;
+            background: #ddd;
+            padding: 20px;
+        }
+
+        .box {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            height: 200px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- LEFT SIDE -->
+    <div class="chat-container">
+        <div id="chat" class="chat-box"></div>
+
+        <div class="input-area">
+            <input id="input" placeholder="Type message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="side-panel">
+        <div class="box">Image Generation(coming sooo)</div>
+        <div class="box">Conversation Storage(coming soo)</div>
+    </div>
+
+<script>
+async function sendMessage() {
+    let input = document.getElementById("input");
+    let chat = document.getElementById("chat");
+
+    let message = input.value;
+    if (!message) return;
+
+    // Show user message
+    chat.innerHTML += `<p><b>You:</b> ${message}</p>`;
+
+    // Show temporary thinking message
+    let thinkingId = "thinking-" + Date.now();
+    chat.innerHTML += `<p id="${thinkingId}"><b>Tujji:</b> Thinking...</p>`;
+
+    input.value = "";
+
+    try {
+        let res = await fetch("http://127.0.0.1:5000//ask", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ message: message })
+        });
+
+        let data = await res.json();
+
+        // Replace "Thinking..." with real reply
+        document.getElementById(thinkingId).innerHTML =
+             `<b>Tujji:</b><br>${data.reply.replace(/\n/g, "<br>")}`;
+
+    } catch (error) {
+        document.getElementById(thinkingId).innerHTML =
+            `<b>Tujji:</b> Error connecting to server`;
+    }
+
+    // Auto scroll
+    chat.scrollTop = chat.scrollHeight;
+}
+
+
+
+</script>
+
+</body>
+</html>
